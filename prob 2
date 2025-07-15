@@ -1,0 +1,109 @@
+// Problem 2: User Profile Formatter
+
+enum UserRole { admin, user, guest, moderator }
+
+class UserProfile {
+  String? firstName;
+  String? lastName;
+  String? middleName;
+  dynamic role;
+  int? age;
+  String? email;
+  
+  UserProfile();
+}
+
+class FormattedProfile {
+  String fullName = '';
+  UserRole userRole = UserRole.guest;
+  String displayAge = '';
+  String contactEmail = '';
+  
+  FormattedProfile();
+}
+
+// User Profile Formatter Function
+FormattedProfile formatUserProfile(UserProfile profile) {
+  return FormattedProfile()
+    ..fullName = _buildFullName(profile)
+    ..userRole = _convertToUserRole(profile.role)
+    ..displayAge = profile.age != null ? "${profile.age} years old" : "Age not provided"
+    ..contactEmail = profile.email ?? "No email provided";
+}
+
+// Helper function using cascade to build name from nullable components
+String _buildFullName(UserProfile profile) {
+  StringBuffer nameBuffer = StringBuffer();
+  
+  nameBuffer
+    ..write(profile.firstName ?? '')
+    ..write(profile.middleName != null ? ' ${profile.middleName}' : '')
+    ..write(profile.lastName != null ? ' ${profile.lastName}' : '');
+  
+  String result = nameBuffer.toString().trim();
+  return result.isEmpty ? 'Anonymous User' : result;
+}
+
+// Type test to convert dynamic role to enum
+UserRole _convertToUserRole(dynamic role) {
+  if (role is String) {
+    switch (role.toLowerCase()) {
+      case 'admin': return UserRole.admin;
+      case 'user': return UserRole.user;
+      case 'guest': return UserRole.guest;
+      case 'moderator': return UserRole.moderator;
+      default: return UserRole.guest;
+    }
+  } else if (role is UserRole) {
+    return role;
+  } else {
+    return UserRole.guest;
+  }
+}
+
+// Ternary operator for role display
+String getRoleDisplay(UserRole role) {
+  return role == UserRole.admin ? "Administrator" :
+         role == UserRole.moderator ? "Moderator" :
+         role == UserRole.user ? "Regular User" : "Guest";
+}
+
+// Demo function
+void main() {
+  print("=== Problem 2: User Profile Formatter ===");
+  
+  // Using cascade to build user profile
+  UserProfile user1 = UserProfile()
+    ..firstName = "John"
+    ..lastName = "Doe"
+    ..middleName = "William"
+    ..role = "admin"
+    ..age = 30
+    ..email = "john.doe@example.com";
+  
+  UserProfile user2 = UserProfile()
+    ..firstName = "Jane"
+    ..role = UserRole.moderator
+    ..age = 25;
+  
+  UserProfile user3 = UserProfile()
+    ..role = "invalid_role";
+  
+  FormattedProfile formatted1 = formatUserProfile(user1);
+  FormattedProfile formatted2 = formatUserProfile(user2);
+  FormattedProfile formatted3 = formatUserProfile(user3);
+  
+  print("User 1: ${formatted1.fullName}");
+  print("Role: ${getRoleDisplay(formatted1.userRole)}");
+  print("Age: ${formatted1.displayAge}");
+  print("Email: ${formatted1.contactEmail}");
+  print();
+  
+  print("User 2: ${formatted2.fullName}");
+  print("Role: ${getRoleDisplay(formatted2.userRole)}");
+  print("Email: ${formatted2.contactEmail}");
+  print();
+  
+  print("User 3: ${formatted3.fullName}");
+  print("Role: ${getRoleDisplay(formatted3.userRole)}");
+}
