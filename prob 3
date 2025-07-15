@@ -1,0 +1,164 @@
+// Problem 3: Payment Processor
+
+abstract class PaymentMethod {
+  String process();
+}
+
+class Card extends PaymentMethod {
+  String cardNumber = '';
+  String cardHolder = '';
+  String expiryDate = '';
+  double amount = 0;
+  
+  Card();
+  
+  @override
+  String process() => "Processing card payment of \$${amount.toStringAsFixed(2)}";
+}
+
+class Cash extends PaymentMethod {
+  double amount = 0;
+  String currency = 'USD';
+  
+  Cash();
+  
+  @override
+  String process() => "Processing cash payment of ${amount.toStringAsFixed(2)} $currency";
+}
+
+class TransactionDetails {
+  String method = '';
+  double amount = 0;
+  String currency = 'USD';
+  String status = '';
+  DateTime timestamp = DateTime.now();
+  double fee = 0;
+  
+  TransactionDetails();
+}
+
+// Payment Processor Function with type tests
+TransactionDetails processPayment(dynamic paymentMethod, {String targetCurrency = 'USD'}) {
+  TransactionDetails transaction = TransactionDetails();
+  
+  if (paymentMethod is Card) {
+    transaction
+      ..method = 'Credit Card'
+      ..amount = _convertCurrency(paymentMethod.amount, 'USD', targetCurrency)
+      ..currency = targetCurrency
+      ..status = paymentMethod.cardNumber.isNotEmpty ? 'Approved' : 'Declined - Invalid card'
+      ..fee = _calculateFee(paymentMethod.amount, 'card')
+      ..timestamp = DateTime.now();
+  } else if (paymentMethod is Cash) {
+    transaction
+      ..method = 'Cash'
+      ..amount = _convertCurrency(paymentMethod.amount, paymentMethod.currency, targetCurrency)
+      ..currency = targetCurrency
+      ..status = paymentMethod.amount > 0 ? 'Approved' : 'Declined - Invalid amount'
+      ..fee = _calculateFee(paymentMethod.amount, 'cash')
+      ..timestamp = DateTime.now();
+  } else {
+    transaction
+      ..method = 'Unknown'
+      ..amount = 0
+      ..currency = targetCurrency
+      ..status = 'Declined - Invalid payment method'
+      ..fee = 0
+      ..timestamp = DateTime.now();
+  }
+  
+  return transaction;
+}
+
+// Ternary operator for currency conversion
+double _convertCurrency(double amount, String fromCurrency, String toCurrency) {
+  // Simplified conversion rates
+  Map<String, double> rates = {
+    'USD': 1.0,
+    'EUR': 0.85,
+    'GBP': 0.73,
+    'JPY': 110.0,
+    'CAD': 1.25,
+  };
+  
+  double fromRate = rates[fromCurrency] ?? 1.0;
+  double toRate = rates[toCurrency] ?? 1.0;
+  
+  return fromCurrency == toCurrency ? amount : 
+         fromCurrency == 'USD' ? amount * toRate :
+         toCurrency == 'USD' ? amount / fromRate :
+         (amount / fromRate) * toRate;
+}
+
+// Ternary operator for fee calculation
+double _calculateFee(double amount, String paymentType) {
+  return paymentType == 'card' ? amount * 0.03 :
+         paymentType == 'cash' ? amount * 0.01 :
+         0.0;
+}
+
+// Ternary operator for payment method info
+String getPaymentMethodInfo(dynamic paymentMethod) {
+  return paymentMethod is Card ? 
+         "Card ending in ${paymentMethod.cardNumber.length > 4 ? paymentMethod.cardNumber.substring(paymentMethod.cardNumber.length - 4) : paymentMethod.cardNumber}" :
+         paymentMethod is Cash ? 
+         "Cash payment in ${paymentMethod.currency}" :
+         "Unknown payment method";
+}
+
+// Ternary operator for status color coding
+String getStatusColor(String status) {
+  return status.contains('Approved') ? 'GREEN' :
+         status.contains('Declined') ? 'RED' :
+         'YELLOW';
+}
+
+// Demo function
+void main() {
+  print("=== Problem 3: Payment Processor ===");
+  
+  // Using cascade to set payment details
+  Card card = Card()
+    ..cardNumber = "1234567890123456"
+    ..cardHolder = "John Doe"
+    ..expiryDate = "12/25"
+    ..amount = 100.0;
+  
+  Cash cash = Cash()
+    ..amount = 50.0
+    ..currency = "EUR";
+  
+  Cash invalidCash = Cash()
+    ..amount = -10.0
+    ..currency = "USD";
+  
+  // Process payments
+  TransactionDetails cardTransaction = processPayment(card, targetCurrency: 'EUR');
+  TransactionDetails cashTransaction = processPayment(cash, targetCurrency: 'USD');
+  TransactionDetails invalidTransaction = processPayment(invalidCash);
+  TransactionDetails unknownTransaction = processPayment("invalid payment");
+  
+  // Display results
+  print("Card Payment:");
+  print("  Method: ${cardTransaction.method}");
+  print("  Amount: ${cardTransaction.amount.toStringAsFixed(2)} ${cardTransaction.currency}");
+  print("  Status: ${cardTransaction.status} (${getStatusColor(cardTransaction.status)})");
+  print("  Fee: ${cardTransaction.fee.toStringAsFixed(2)}");
+  print("  Info: ${getPaymentMethodInfo(card)}");
+  print();
+  
+  print("Cash Payment:");
+  print("  Method: ${cashTransaction.method}");
+  print("  Amount: ${cashTransaction.amount.toStringAsFixed(2)} ${cashTransaction.currency}");
+  print("  Status: ${cashTransaction.status} (${getStatusColor(cashTransaction.status)})");
+  print("  Fee: ${cashTransaction.fee.toStringAsFixed(2)}");
+  print("  Info: ${getPaymentMethodInfo(cash)}");
+  print();
+  
+  print("Invalid Cash Payment:");
+  print("  Status: ${invalidTransaction.status} (${getStatusColor(invalidTransaction.status)})");
+  print();
+  
+  print("Unknown Payment:");
+  print("  Status: ${unknownTransaction.status} (${getStatusColor(unknownTransaction.status)})");
+}
