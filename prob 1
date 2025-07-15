@@ -1,0 +1,57 @@
+// Problem 1: Shape Area Calculator
+
+abstract class Shape {
+  double calculateArea();
+}
+
+class Circle extends Shape {
+  double radius = 0;
+  
+  Circle();
+  
+  @override
+  double calculateArea() => 3.14159 * radius * radius;
+}
+
+class Rectangle extends Shape {
+  double width = 0;
+  double height = 0;
+  
+  Rectangle();
+  
+  @override
+  double calculateArea() => width * height;
+}
+
+// Shape Area Calculator Function with type checks
+dynamic calculateShapeArea(dynamic shape) {
+  if (shape is Circle) {
+    return shape.calculateArea();
+  } else if (shape is Rectangle) {
+    return shape.calculateArea();
+  } else {
+    return "Unknown shape";
+  }
+}
+
+// Using ternary operator for shape info
+String getShapeInfo(dynamic shape) {
+  return shape is Circle ? "Circle with radius ${shape.radius}" :
+         shape is Rectangle ? "Rectangle ${shape.width}x${shape.height}" :
+         "Unknown shape";
+}
+
+// Demo function
+void main() {
+  print("=== Problem 1: Shape Area Calculator ===");
+  
+  // Using cascade to set properties
+  Circle circle = Circle()..radius = 5.0;
+  Rectangle rectangle = Rectangle()..width = 10.0..height = 6.0;
+  
+  print("Circle area: ${calculateShapeArea(circle)}");
+  print("Rectangle area: ${calculateShapeArea(rectangle)}");
+  print("Unknown shape: ${calculateShapeArea("not a shape")}");
+  print("Shape info: ${getShapeInfo(circle)}");
+  print("Shape info: ${getShapeInfo(rectangle)}");
+}
